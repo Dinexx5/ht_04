@@ -25,7 +25,7 @@ export type blogDbType = {
 }
 
 export type postDbType = {
-    _id: string,
+    _id: Object,
     title: string,
     shortDescription: string,
     content: string,
