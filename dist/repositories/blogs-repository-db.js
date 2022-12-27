@@ -46,23 +46,21 @@ exports.blogsRepository = {
     },
     getBlogById(id) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (mongodb_1.ObjectId.isValid(id)) {
-                let _id = new mongodb_1.ObjectId(id);
-                let blog = yield db_1.blogsCollection.findOne({ _id: _id });
-                if (blog) {
-                    return {
-                        name: blog.name,
-                        description: blog.description,
-                        websiteUrl: blog.websiteUrl,
-                        createdAt: blog.createdAt,
-                        id: blog._id.toString()
-                    };
-                }
-                else {
-                    return null;
-                }
+            if (!mongodb_1.ObjectId.isValid(id)) {
+                return null;
             }
-            return null;
+            let _id = new mongodb_1.ObjectId(id);
+            let blog = yield db_1.blogsCollection.findOne({ _id: _id });
+            if (!blog) {
+                return null;
+            }
+            return {
+                name: blog.name,
+                description: blog.description,
+                websiteUrl: blog.websiteUrl,
+                createdAt: blog.createdAt,
+                id: blog._id.toString()
+            };
         });
     },
     deleteBlogById(id) {
