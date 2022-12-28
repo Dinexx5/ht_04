@@ -2,6 +2,7 @@ import {Request, Response, Router} from "express"
 import {basicAuthorisation, blogIdlValidation, contentValidation, inputValidationMiddleware, shortDescriptionValidation, titleValidation} from "../middlewares/input-validation";
 import {postsService} from "../domain/posts-service";
 import {postType} from "../repositories/types";
+import {postsQueryRepository} from "../repositories/posts-query-repository";
 
 
 
@@ -11,12 +12,12 @@ export const postsRouter = Router({})
 
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const posts: postType[] = await postsService.getAllPosts()
+    const posts: postType[] = await postsQueryRepository.getAllPosts()
     res.status(200).send(posts)
 })
 
 postsRouter.get('/:id', async (req: Request, res: Response) => {
-    let post: postType | null = await postsService.getPostById(req.params.id)
+    let post: postType | null = await postsQueryRepository.getPostById(req.params.id)
     if (!post) {
         res.send(404)
     } else {

@@ -11,7 +11,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogIdlValidation = exports.contentValidation = exports.shortDescriptionValidation = exports.titleValidation = exports.websiteUrlValidation = exports.descriptionValidation = exports.nameValidation = exports.inputValidationMiddleware = exports.basicAuthorisation = void 0;
 const express_validator_1 = require("express-validator");
-const blogs_repository_db_1 = require("../repositories/blogs-repository-db");
+const blogs_query_repository_1 = require("../repositories/blogs-query-repository");
 const basicAuthorisation = (req, res, next) => {
     const loginPass = req.headers.authorization;
     if (loginPass === "Basic YWRtaW46cXdlcnR5") {
@@ -51,7 +51,7 @@ exports.contentValidation = (0, express_validator_1.body)('content').trim().isLe
 exports.blogIdlValidation = (0, express_validator_1.body)('blogId').trim().not().isEmpty().withMessage('Not a string blogId').isLength({ max: 30 })
     .withMessage('Incorrect length of blogId')
     .custom((value) => __awaiter(void 0, void 0, void 0, function* () {
-    const blog = yield blogs_repository_db_1.blogsRepository.getBlogById(value);
+    const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(value);
     if (blog) {
         if (value !== blog.id) {
             throw new Error('blog id does not exists');

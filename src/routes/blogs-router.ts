@@ -2,18 +2,19 @@ import {Request, Response, Router} from "express";
 import {blogsService} from "../domain/blogs-service";
 import {basicAuthorisation, descriptionValidation, inputValidationMiddleware, nameValidation, websiteUrlValidation} from "../middlewares/input-validation";
 import {blogType} from "../repositories/types";
+import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 
 
 export const blogsRouter = Router({})
 
 
 blogsRouter.get('/', async (req: Request, res: Response) => {
-    const blogs: blogType[] = await blogsService.getAllBlogs()
+    const blogs: blogType[] = await blogsQueryRepository.getAllBlogs()
     res.status(200).send(blogs)
 })
 
 blogsRouter.get('/:id', async (req: Request, res: Response) => {
-    const blog: blogType | null = await blogsService.getBlogById(req.params.id)
+    const blog: blogType | null = await blogsQueryRepository.getBlogById(req.params.id)
     if (!blog) {
         res.send(404)
     } else {

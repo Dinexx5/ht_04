@@ -1,13 +1,13 @@
-import {blogsRepository} from "./blogs-repository-db";
 import {postsCollection} from "./db";
 import {blogType, postDbType, postType} from "./types";
 import {ObjectId} from "mongodb";
+import {blogsQueryRepository} from "./blogs-query-repository";
 
 
 export const postsRepository = {
 
     async createPost (title: string, shortDescription: string, content: string, blogId: string): Promise<postType> {
-        let foundBlog = await blogsRepository.getBlogById(blogId)
+        let foundBlog = await blogsQueryRepository.getBlogById(blogId)
         const newDbPost: postDbType  = {
             _id: new ObjectId(),
             title: title,
@@ -30,47 +30,6 @@ export const postsRepository = {
     },
 
 
-
-    async getPostById (id: string): Promise<postType | null> {
-        if (!ObjectId.isValid(id)) {
-            return null
-        }
-
-        let _id = new ObjectId(id)
-        let post: postDbType | null = await postsCollection.findOne({_id: _id})
-        if (!post) {
-            return null
-        }
-
-        return {
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }
-    },
-
-
-
-    async getAllPosts (): Promise<postType[]> {
-
-        let postsDb = await postsCollection.find({}).toArray()
-        return postsDb.map((post: postDbType) => ({
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }))
-    },
-
-
-
     async deletePostById (id: string): Promise<boolean> {
         if (!ObjectId.isValid(id)) {
             return false
@@ -87,7 +46,7 @@ export const postsRepository = {
         if (!ObjectId.isValid(id)) {
             return false
         }
-        let foundBlog: blogType | null = await blogsRepository.getBlogById(blogId)
+        let foundBlog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
         if (!foundBlog) {
             return false
         }

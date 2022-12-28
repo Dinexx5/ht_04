@@ -1,24 +1,14 @@
 import {postsRepository} from "../repositories/posts-repository-db";
 import {postType} from "../repositories/types";
+import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 
 
 
 export const postsService = {
 
 
-    async getAllPosts(): Promise<postType[]> {
-        return await postsRepository.getAllPosts()
-    },
-
-
     async createPost(title: string, shortDescription: string, content: string, blogId: string): Promise<postType> {
         return await postsRepository.createPost(title, shortDescription, content, blogId)
-    },
-
-
-    async getPostById(id: string): Promise<postType | null> {
-
-        return await postsRepository.getPostById(id)
     },
 
 
