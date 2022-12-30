@@ -14,6 +14,7 @@ const express_1 = require("express");
 const blogs_service_1 = require("../domain/blogs-service");
 const input_validation_1 = require("../middlewares/input-validation");
 const blogs_query_repository_1 = require("../repositories/blogs-query-repository");
+const posts_service_1 = require("../domain/posts-service");
 exports.blogsRouter = (0, express_1.Router)({});
 exports.blogsRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
@@ -32,6 +33,16 @@ exports.blogsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, 
     else {
         res.send(blog);
     }
+}));
+exports.blogsRouter.post('/:id/posts', input_validation_1.basicAuthorisation, input_validation_1.titleValidation, input_validation_1.shortDescriptionValidation, input_validation_1.contentValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
+    const { title, shortDescription, content } = req.body;
+    const blogId = req.params.id;
+    const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
+    if (!blog) {
+        res.send(404);
+    }
+    const newPost = yield posts_service_1.postsService.createPost(title, shortDescription, content, blogId);
+    res.status(201).send(newPost);
 }));
 exports.blogsRouter.post('/', input_validation_1.basicAuthorisation, input_validation_1.nameValidation, input_validation_1.descriptionValidation, input_validation_1.websiteUrlValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const { name, description, websiteUrl } = req.body;

@@ -1,8 +1,16 @@
 import {Request, Response, Router} from "express";
 import {blogsService} from "../domain/blogs-service";
-import {basicAuthorisation, descriptionValidation, inputValidationMiddleware, nameValidation, websiteUrlValidation} from "../middlewares/input-validation";
-import {blogType, blogsViewModel} from "../repositories/types";
+import {
+    basicAuthorisation, blogIdlValidation, contentValidation,
+    descriptionValidation,
+    inputValidationMiddleware,
+    nameValidation, shortDescriptionValidation,
+    titleValidation,
+    websiteUrlValidation
+} from "../middlewares/input-validation";
+import {blogType, blogsViewModel, postType} from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
+import {postsService} from "../domain/posts-service";
 
 
 export const blogsRouter = Router({})
@@ -32,6 +40,26 @@ blogsRouter.get('/:id', async (req: Request, res: Response) => {
     } else {
         res.send(blog)
     }
+})
+
+blogsRouter.post('/:id/posts',
+        basicAuthorisation,
+        titleValidation,
+        shortDescriptionValidation,
+        contentValidation,
+        inputValidationMiddleware,
+        async (req: Request, res: Response) => {
+
+            const {title, shortDescription, content} = req.body
+            const blogId = req.params.id
+            const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
+            if (!blog) {
+                res.send(404)
+            }
+
+            const newPost: postType = await postsService.createPost(title, shortDescription, content, blogId)
+            res.status(201).send(newPost)
+
 })
 
 blogsRouter.post('/',
