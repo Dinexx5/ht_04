@@ -55,6 +55,7 @@ blogsRouter.get('/:id/posts', async (req: Request, res: Response) => {
     const blog: blogType | null = await blogsQueryRepository.getBlogById(req.params.id)
     if (!blog) {
         res.send(404)
+        return
     }
 
     const returnedPosts: postsViewModel = await postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize)

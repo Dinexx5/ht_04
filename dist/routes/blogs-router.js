@@ -43,6 +43,7 @@ exports.blogsRouter.get('/:id/posts', (req, res) => __awaiter(void 0, void 0, vo
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(req.params.id);
     if (!blog) {
         res.send(404);
+        return;
     }
     const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize);
     res.status(200).send(returnedPosts);
