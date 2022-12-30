@@ -1,14 +1,23 @@
-import {postsCollection} from "./db";
-import {postDbType, postType} from "./types";
+import {blogsCollection, postsCollection} from "./db";
+import {blogDbType, postDbType, postsViewModel, postType} from "./types";
 import {ObjectId} from "mongodb";
 
 
 export const postsQueryRepository = {
 
-    async getAllPosts (): Promise<postType[]> {
+    async getAllPosts (sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number,): Promise<postsViewModel> {
 
-        let postsDb = await postsCollection.find({}).toArray()
-        return postsDb.map((post: postDbType) => ({
+        const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
+        const skippedBlogsNumber = (pageNumber-1)*pageSize
+        const countAll = await blogsCollection.countDocuments()
+
+        let postsDb = await postsCollection
+            .find({})
+            .sort( {[sortBy]: sortDirectionNumber} )
+            .skip(skippedBlogsNumber)
+            .limit(pageSize)
+            .toArray()
+        const postsView = postsDb.map((post: postDbType) => ({
             id: post._id.toString(),
             title: post.title,
             shortDescription: post.shortDescription,
@@ -17,6 +26,13 @@ export const postsQueryRepository = {
             blogName: post.blogName,
             createdAt: post.createdAt
         }))
+        return {
+            pagesCount: Math.ceil(countAll/pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: countAll,
+            items: postsView
+        }
     },
 
     async getPostById (id: string): Promise<postType | null> {

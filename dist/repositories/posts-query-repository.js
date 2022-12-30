@@ -13,10 +13,18 @@ exports.postsQueryRepository = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
 exports.postsQueryRepository = {
-    getAllPosts() {
+    getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize) {
         return __awaiter(this, void 0, void 0, function* () {
-            let postsDb = yield db_1.postsCollection.find({}).toArray();
-            return postsDb.map((post) => ({
+            const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
+            const skippedBlogsNumber = (pageNumber - 1) * pageSize;
+            const countAll = yield db_1.blogsCollection.countDocuments();
+            let postsDb = yield db_1.postsCollection
+                .find({})
+                .sort({ [sortBy]: sortDirectionNumber })
+                .skip(skippedBlogsNumber)
+                .limit(pageSize)
+                .toArray();
+            const postsView = postsDb.map((post) => ({
                 id: post._id.toString(),
                 title: post.title,
                 shortDescription: post.shortDescription,
@@ -25,6 +33,13 @@ exports.postsQueryRepository = {
                 blogName: post.blogName,
                 createdAt: post.createdAt
             }));
+            return {
+                pagesCount: Math.ceil(countAll / pageSize),
+                page: pageNumber,
+                pageSize: pageSize,
+                totalCount: countAll,
+                items: postsView
+            };
         });
     },
     getPostById(id) {

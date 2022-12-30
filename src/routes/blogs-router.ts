@@ -1,16 +1,17 @@
 import {Request, Response, Router} from "express";
 import {blogsService} from "../domain/blogs-service";
 import {
-    basicAuthorisation, blogIdlValidation, contentValidation,
+    basicAuthorisation, contentValidation,
     descriptionValidation,
     inputValidationMiddleware,
     nameValidation, shortDescriptionValidation,
     titleValidation,
     websiteUrlValidation
 } from "../middlewares/input-validation";
-import {blogType, blogsViewModel, postType} from "../repositories/types";
+import {blogType, blogsViewModel, postType, postsViewModel} from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 import {postsService} from "../domain/posts-service";
+import {postsQueryRepository} from "../repositories/posts-query-repository";
 
 
 export const blogsRouter = Router({})
@@ -41,6 +42,29 @@ blogsRouter.get('/:id', async (req: Request, res: Response) => {
         res.send(blog)
     }
 })
+
+blogsRouter.get('/:id/posts', async (req: Request, res: Response) => {
+    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
+
+    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
+
+    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
+
+    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
+
+    const blogId = req.params.id
+
+    const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
+    if (!blog) {
+        res.send(404)
+    }
+
+    const returnedPosts: postsViewModel = await postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize)
+
+    res.status(200).send(returnedPosts)
+
+    })
+
 
 blogsRouter.post('/:id/posts',
         basicAuthorisation,

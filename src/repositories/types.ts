@@ -42,4 +42,12 @@ export type blogsViewModel = {
     items: blogType[]
 }
 
+export type postsViewModel = {
+    pagesCount: number
+    page: number
+    pageSize: number
+    totalCount: number
+    items: postType[]
+}
+
 

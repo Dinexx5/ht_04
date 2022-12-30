@@ -1,7 +1,7 @@
 import {Request, Response, Router} from "express"
 import {basicAuthorisation, blogIdlValidation, contentValidation, inputValidationMiddleware, shortDescriptionValidation, titleValidation} from "../middlewares/input-validation";
 import {postsService} from "../domain/posts-service";
-import {postType} from "../repositories/types";
+import {postsViewModel, postType} from "../repositories/types";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
 
 
@@ -12,8 +12,16 @@ export const postsRouter = Router({})
 
 
 postsRouter.get('/', async (req: Request, res: Response) => {
-    const posts: postType[] = await postsQueryRepository.getAllPosts()
-    res.status(200).send(posts)
+
+    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
+
+    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
+
+    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
+
+    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
+    const returnedPosts: postsViewModel = await postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize)
+    res.status(200).send(returnedPosts)
 })
 
 postsRouter.get('/:id', async (req: Request, res: Response) => {
