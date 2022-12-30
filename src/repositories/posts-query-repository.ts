@@ -38,15 +38,16 @@ export const postsQueryRepository = {
     async getPostForBlog (sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number, blogId: string): Promise<postsViewModel> {
 
         const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
-        const skippedBlogsNumber = (pageNumber-1)*pageSize
-        const countAll = await blogsCollection.countDocuments()
+        const skippedPostsNumber = (pageNumber-1)*pageSize
+        const countAll = await postsCollection.countDocuments()
 
         let postsDb = await postsCollection
             .find({blogId: {$regex: blogId} })
             .sort( {[sortBy]: sortDirectionNumber} )
-            .skip(skippedBlogsNumber)
+            .skip(skippedPostsNumber)
             .limit(pageSize)
             .toArray()
+
         const postsView = postsDb.map((post: postDbType) => ({
             id: post._id.toString(),
             title: post.title,

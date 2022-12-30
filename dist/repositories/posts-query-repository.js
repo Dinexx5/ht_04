@@ -45,12 +45,12 @@ exports.postsQueryRepository = {
     getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId) {
         return __awaiter(this, void 0, void 0, function* () {
             const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
-            const skippedBlogsNumber = (pageNumber - 1) * pageSize;
-            const countAll = yield db_1.blogsCollection.countDocuments();
+            const skippedPostsNumber = (pageNumber - 1) * pageSize;
+            const countAll = yield db_1.postsCollection.countDocuments();
             let postsDb = yield db_1.postsCollection
                 .find({ blogId: { $regex: blogId } })
                 .sort({ [sortBy]: sortDirectionNumber })
-                .skip(skippedBlogsNumber)
+                .skip(skippedPostsNumber)
                 .limit(pageSize)
                 .toArray();
             const postsView = postsDb.map((post) => ({
