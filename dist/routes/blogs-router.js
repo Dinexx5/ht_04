@@ -40,12 +40,13 @@ exports.blogsRouter.get('/:id/posts', (req, res) => __awaiter(void 0, void 0, vo
     let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
     let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
     let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
+    let blogId = req.params.id;
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(req.params.id);
     if (!blog) {
         res.send(404);
         return;
     }
-    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize);
+    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId);
     res.status(200).send(returnedPosts);
 }));
 exports.blogsRouter.post('/:id/posts', input_validation_1.basicAuthorisation, input_validation_1.titleValidation, input_validation_1.shortDescriptionValidation, input_validation_1.contentValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {

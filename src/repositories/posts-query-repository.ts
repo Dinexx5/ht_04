@@ -35,6 +35,36 @@ export const postsQueryRepository = {
         }
     },
 
+    async getPostForBlog (sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number, blogId: string): Promise<postsViewModel> {
+
+        const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
+        const skippedBlogsNumber = (pageNumber-1)*pageSize
+        const countAll = await blogsCollection.countDocuments()
+
+        let postsDb = await postsCollection
+            .find({blogId: {$regex: blogId} })
+            .sort( {[sortBy]: sortDirectionNumber} )
+            .skip(skippedBlogsNumber)
+            .limit(pageSize)
+            .toArray()
+        const postsView = postsDb.map((post: postDbType) => ({
+            id: post._id.toString(),
+            title: post.title,
+            shortDescription: post.shortDescription,
+            content: post.content,
+            blogId: post.blogId,
+            blogName: post.blogName,
+            createdAt: post.createdAt
+        }))
+        return {
+            pagesCount: Math.ceil(countAll/pageSize),
+            page: pageNumber,
+            pageSize: pageSize,
+            totalCount: countAll,
+            items: postsView
+        }
+    },
+
     async getPostById (id: string): Promise<postType | null> {
         if (!ObjectId.isValid(id)) {
             return null

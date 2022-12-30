@@ -42,6 +42,35 @@ exports.postsQueryRepository = {
             };
         });
     },
+    getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
+            const skippedBlogsNumber = (pageNumber - 1) * pageSize;
+            const countAll = yield db_1.blogsCollection.countDocuments();
+            let postsDb = yield db_1.postsCollection
+                .find({ blogId: { $regex: blogId } })
+                .sort({ [sortBy]: sortDirectionNumber })
+                .skip(skippedBlogsNumber)
+                .limit(pageSize)
+                .toArray();
+            const postsView = postsDb.map((post) => ({
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt
+            }));
+            return {
+                pagesCount: Math.ceil(countAll / pageSize),
+                page: pageNumber,
+                pageSize: pageSize,
+                totalCount: countAll,
+                items: postsView
+            };
+        });
+    },
     getPostById(id) {
         return __awaiter(this, void 0, void 0, function* () {
             if (!mongodb_1.ObjectId.isValid(id)) {
