@@ -39,7 +39,7 @@ export const postsQueryRepository = {
 
         const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
         const skippedPostsNumber = (pageNumber-1)*pageSize
-        const countAll = await postsCollection.countDocuments()
+        const countAll = await postsCollection.countDocuments({blogId: {$regex: blogId} })
 
         let postsDb = await postsCollection
             .find({blogId: {$regex: blogId} })
