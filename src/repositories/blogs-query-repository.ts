@@ -27,7 +27,7 @@ export const blogsQueryRepository = {
                 id: blog._id.toString()
             }))
             return {
-                pagesCount: countAllWithSearchTerm/pageSize,
+                pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
                 page: pageNumber,
                 pageSize: pageSize,
                 totalCount: countAllWithSearchTerm,
@@ -50,7 +50,7 @@ export const blogsQueryRepository = {
             id: blog._id.toString()
         }))
         return {
-            pagesCount: countAll/pageSize,
+            pagesCount: Math.ceil(countAll/pageSize),
             page: pageNumber,
             pageSize: pageSize,
             totalCount: countAll,
