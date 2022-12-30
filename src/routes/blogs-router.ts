@@ -52,9 +52,7 @@ blogsRouter.get('/:id/posts', async (req: Request, res: Response) => {
 
     let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
 
-    const blogId = req.params.id
-
-    const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
+    const blog: blogType | null = await blogsQueryRepository.getBlogById(req.params.id)
     if (!blog) {
         res.send(404)
     }

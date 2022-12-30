@@ -40,8 +40,7 @@ exports.blogsRouter.get('/:id/posts', (req, res) => __awaiter(void 0, void 0, vo
     let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
     let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
     let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
-    const blogId = req.params.id;
-    const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
+    const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(req.params.id);
     if (!blog) {
         res.send(404);
     }

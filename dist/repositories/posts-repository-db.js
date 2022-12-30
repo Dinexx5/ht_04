@@ -24,7 +24,7 @@ exports.postsRepository = {
                 content: content,
                 blogId: blogId,
                 blogName: foundBlog.name,
-                createdAt: new Date().toISOString()
+                createdAt: foundBlog.createdAt
             };
             yield db_1.postsCollection.insertOne(newDbPost);
             return {
@@ -34,7 +34,7 @@ exports.postsRepository = {
                 content: content,
                 blogId: blogId,
                 blogName: foundBlog.name,
-                createdAt: new Date().toISOString()
+                createdAt: foundBlog.createdAt
             };
         });
     },
