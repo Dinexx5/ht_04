@@ -55,6 +55,7 @@ exports.blogsRouter.post('/:id/posts', input_validation_1.basicAuthorisation, in
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
     if (!blog) {
         res.send(404);
+        return;
     }
     const newPost = yield posts_service_1.postsService.createPost(title, shortDescription, content, blogId);
     res.status(201).send(newPost);

@@ -80,6 +80,7 @@ blogsRouter.post('/:id/posts',
             const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
             if (!blog) {
                 res.send(404)
+                return
             }
 
             const newPost: postType = await postsService.createPost(title, shortDescription, content, blogId)
