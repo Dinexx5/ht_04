@@ -1,7 +1,7 @@
 import {Request, Response, Router} from "express";
 import {blogsService} from "../domain/blogs-service";
 import {basicAuthorisation, descriptionValidation, inputValidationMiddleware, nameValidation, websiteUrlValidation} from "../middlewares/input-validation";
-import {blogType} from "../repositories/types";
+import {blogType, blogsViewModel} from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 
 
@@ -9,8 +9,20 @@ export const blogsRouter = Router({})
 
 
 blogsRouter.get('/', async (req: Request, res: Response) => {
-    const blogs: blogType[] = await blogsQueryRepository.getAllBlogs()
-    res.status(200).send(blogs)
+
+    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
+
+    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
+
+    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
+
+    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
+
+    let searchNameTerm: string | null = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
+
+    const returnedBlogs: blogsViewModel = await blogsQueryRepository.getAllBlogs(sortDirectionString, sortBy, pageNumber, pageSize, searchNameTerm)
+
+    res.status(200).send(returnedBlogs)
 })
 
 blogsRouter.get('/:id', async (req: Request, res: Response) => {

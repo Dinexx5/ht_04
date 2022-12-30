@@ -16,8 +16,13 @@ const input_validation_1 = require("../middlewares/input-validation");
 const blogs_query_repository_1 = require("../repositories/blogs-query-repository");
 exports.blogsRouter = (0, express_1.Router)({});
 exports.blogsRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const blogs = yield blogs_query_repository_1.blogsQueryRepository.getAllBlogs();
-    res.status(200).send(blogs);
+    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
+    let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
+    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
+    let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
+    let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null;
+    const returnedBlogs = yield blogs_query_repository_1.blogsQueryRepository.getAllBlogs(sortDirectionString, sortBy, pageNumber, pageSize, searchNameTerm);
+    res.status(200).send(returnedBlogs);
 }));
 exports.blogsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(req.params.id);

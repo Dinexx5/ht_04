@@ -52,11 +52,8 @@ exports.blogIdlValidation = (0, express_validator_1.body)('blogId').trim().not()
     .withMessage('Incorrect length of blogId')
     .custom((value) => __awaiter(void 0, void 0, void 0, function* () {
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(value);
-    if (blog) {
-        if (value !== blog.id) {
-            throw new Error('blog id does not exists');
-        }
-        return true;
+    if (!blog) {
+        throw new Error('blog id does not exist');
     }
-    throw new Error('blog does not exist');
+    return true;
 }));
