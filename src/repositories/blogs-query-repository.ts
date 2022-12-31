@@ -2,6 +2,16 @@ import {blogDbType, blogsViewModel, blogType} from "./types";
 import {blogsCollection} from "./db";
 import {ObjectId} from "mongodb";
 
+function blogsMapperToBlogType (blog: blogDbType): blogType {
+    return  {
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        id: blog._id.toString()
+    }
+
+}
 
 export const blogsQueryRepository = {
 
@@ -12,20 +22,14 @@ export const blogsQueryRepository = {
 
         if (searchNameTerm){
             const countAllWithSearchTerm = await blogsCollection.countDocuments({name: {$regex: searchNameTerm, $options: 'i' } })
-            let blogsDb = await blogsCollection
+            const blogsDb: blogDbType[] = await blogsCollection
                 .find( {name: {$regex: searchNameTerm, $options: 'i' } }  )
                 .sort( {[sortBy]: sortDirectionNumber} )
                 .skip(skippedBlogsNumber)
                 .limit(pageSize)
                 .toArray()
 
-            const blogsView = blogsDb.map((blog: blogDbType) => ({
-                name: blog.name,
-                description: blog.description,
-                websiteUrl: blog.websiteUrl,
-                createdAt: blog.createdAt,
-                id: blog._id.toString()
-            }))
+            const blogsView = blogsDb.map(blogsMapperToBlogType)
             return {
                 pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
                 page: pageNumber,
@@ -42,13 +46,7 @@ export const blogsQueryRepository = {
             .skip(skippedBlogsNumber)
             .limit(pageSize)
             .toArray()
-        const blogsView = blogsDb.map((blog: blogDbType) => ({
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: blog.createdAt,
-            id: blog._id.toString()
-        }))
+        const blogsView = blogsDb.map(blogsMapperToBlogType)
         return {
             pagesCount: Math.ceil(countAll/pageSize),
             page: pageNumber,
@@ -71,13 +69,7 @@ export const blogsQueryRepository = {
             return null
         }
 
-        return {
-            name: blog.name,
-            description: blog.description,
-            websiteUrl: blog.websiteUrl,
-            createdAt: blog.createdAt,
-            id: blog._id.toString()
-        }
+        return blogsMapperToBlogType(blog)
     },
 
 }

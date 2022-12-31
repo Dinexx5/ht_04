@@ -8,16 +8,30 @@ import {
     titleValidation,
     websiteUrlValidation
 } from "../middlewares/input-validation";
-import {blogType, blogsViewModel, postType, postsViewModel} from "../repositories/types";
+import {
+    blogType,
+    blogsViewModel,
+    postType,
+    postsViewModel,
+    RequestWithQuery,
+    RequestWithParams, RequestWithBody, RequestWithParamsAndBody
+} from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 import {postsService} from "../domain/posts-service";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
+import {
+    createBlogModel,
+    createPostForSpecifiedBlogInputModel,
+    getAllBlogsQueryModel,
+    getPostsForSpecifiedBlogModel, updateBlogModel
+} from "../models/models";
+
 
 
 export const blogsRouter = Router({})
 
 
-blogsRouter.get('/', async (req: Request, res: Response) => {
+blogsRouter.get('/', async (req: RequestWithQuery<getAllBlogsQueryModel>, res: Response<blogsViewModel>) => {
 
     let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
 
@@ -34,7 +48,7 @@ blogsRouter.get('/', async (req: Request, res: Response) => {
     res.status(200).send(returnedBlogs)
 })
 
-blogsRouter.get('/:id', async (req: Request, res: Response) => {
+blogsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Response) => {
     const blog: blogType | null = await blogsQueryRepository.getBlogById(req.params.id)
     if (!blog) {
         res.send(404)
@@ -43,7 +57,7 @@ blogsRouter.get('/:id', async (req: Request, res: Response) => {
     }
 })
 
-blogsRouter.get('/:id/posts', async (req: Request, res: Response) => {
+blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndBody<{id:string}, getPostsForSpecifiedBlogModel>, res: Response) => {
     let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
 
     let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
@@ -73,7 +87,7 @@ blogsRouter.post('/:id/posts',
         shortDescriptionValidation,
         contentValidation,
         inputValidationMiddleware,
-        async (req: Request, res: Response) => {
+        async (req: RequestWithParamsAndBody<{id:string}, createPostForSpecifiedBlogInputModel>, res: Response) => {
 
             const {title, shortDescription, content} = req.body
             const blogId = req.params.id
@@ -94,7 +108,7 @@ blogsRouter.post('/',
     descriptionValidation,
     websiteUrlValidation,
     inputValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async (req: RequestWithBody<createBlogModel>, res: Response<blogType>) => {
 
         const {name, description, websiteUrl} = req.body
         const newBlog: blogType = await blogsService.createBlogs(name, description, websiteUrl)
@@ -103,7 +117,7 @@ blogsRouter.post('/',
 
 blogsRouter.delete('/:id',
     basicAuthorisation,
-    async (req: Request, res: Response) => {
+    async (req: RequestWithParams<{id:string}>, res: Response) => {
     const isDeleted: boolean = await blogsService.deleteBlogById(req.params.id)
     if (isDeleted) {
         res.send(204)
@@ -118,7 +132,7 @@ blogsRouter.put('/:id',
     descriptionValidation,
     websiteUrlValidation,
     inputValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async (req: RequestWithParamsAndBody<{id:string}, updateBlogModel>, res: Response) => {
         const id = req.params.id
 
         const {name, description, websiteUrl} = req.body
