@@ -49,7 +49,7 @@ exports.postsQueryRepository = {
             const countAll = yield db_1.postsCollection.countDocuments({ blogId: { $regex: blogId } });
             let postsDb = yield db_1.postsCollection
                 .find({ blogId: { $regex: blogId } })
-                .sort({ [sortBy]: sortDirectionNumber })
+                .sort({ [sortBy]: sortDirectionNumber, title: -1 })
                 .skip(skippedPostsNumber)
                 .limit(pageSize)
                 .toArray();
