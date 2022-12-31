@@ -43,7 +43,7 @@ export const postsQueryRepository = {
 
         let postsDb = await postsCollection
             .find({blogId: {$regex: blogId} })
-            .sort( {[sortBy]: sortDirectionNumber, title: -1, id: -1} )
+            .sort( {[sortBy]: sortDirectionNumber, title: sortDirectionNumber, id: sortDirectionNumber} )
             .skip(skippedPostsNumber)
             .limit(pageSize)
             .toArray()
