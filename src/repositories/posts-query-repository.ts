@@ -2,19 +2,19 @@ import {blogsCollection, postsCollection} from "./db";
 import {blogDbType, blogType, postDbType, postsViewModel, postType, QueryPosts} from "./types";
 import {ObjectId} from "mongodb";
 import {getAllPostsQueryModel} from "../models/models";
-//
-// function postsMapperToPostType (post: postDbType): postType {
-//     return  {
-//         id: post._id.toString(),
-//         title: post.title,
-//         shortDescription: post.shortDescription,
-//         content: post.content,
-//         blogId: post.blogId,
-//         blogName: post.blogName,
-//         createdAt: post.createdAt
-//     }
-//
-// }
+
+function postsMapperToPostType (post: postDbType): postType {
+    return  {
+        id: post._id.toString(),
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt
+    }
+
+}
 
 
 export const postsQueryRepository = {
@@ -32,16 +32,7 @@ export const postsQueryRepository = {
             .skip(skippedBlogsNumber)
             .limit(+pageSize)
             .toArray()
-        const postsView = postsDb.map( (post: postDbType) => ({
-
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt
-            }))
+        const postsView = postsDb.map(postsMapperToPostType)
         return {
             pagesCount: Math.ceil(countAll/pageSize),
             page: +pageNumber,
@@ -65,16 +56,7 @@ export const postsQueryRepository = {
             .limit(+pageSize)
             .toArray()
 
-        const postsView = postsDb.map( (post: postDbType) => ({
-
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }))
+        const postsView = postsDb.map(postsMapperToPostType)
         return {
             pagesCount: Math.ceil(countAll/pageSize),
             page: +pageNumber,
@@ -95,16 +77,7 @@ export const postsQueryRepository = {
             return null
         }
 
-        return {
-
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }
+        return postsMapperToPostType(post)
     },
 
 }
