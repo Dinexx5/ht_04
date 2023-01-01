@@ -17,9 +17,9 @@ export const blogsQueryRepository = {
 
 
     async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel | []> {
-        const {sortDirection = "desc", sortBy = "createdAt", pageNumber = 1,pageSize = 10, searchNameTerm = null} = query
+        const {sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10, searchNameTerm = null} = query
         const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
-        const skippedBlogsNumber = (pageNumber-1)*pageSize
+        const skippedBlogsNumber = (+pageNumber-1)*+pageSize
 
         if (searchNameTerm){
             const countAllWithSearchTerm = await blogsCollection.countDocuments({name: {$regex: searchNameTerm, $options: 'i' } })
@@ -27,15 +27,15 @@ export const blogsQueryRepository = {
                 .find( {name: {$regex: searchNameTerm, $options: 'i' } }  )
                 .sort( {[sortBy]: sortDirectionNumber} )
                 .skip(skippedBlogsNumber)
-                .limit(pageSize)
+                .limit(+pageSize)
                 .toArray()
 
             if (blogsDb.length) {
                 const blogsView = blogsDb.map(blogsMapperToBlogType)
                 return {
                     pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
-                    page: pageNumber,
-                    pageSize: pageSize,
+                    page: +pageNumber,
+                    pageSize: +pageSize,
                     totalCount: countAllWithSearchTerm,
                     items: blogsView
                 }
@@ -48,14 +48,14 @@ export const blogsQueryRepository = {
             .find( { } )
             .sort( {[sortBy]: sortDirectionNumber} )
             .skip(skippedBlogsNumber)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
         if (blogsDb.length) {
             const blogsView = blogsDb.map(blogsMapperToBlogType)
             return {
                 pagesCount: Math.ceil(countAll/pageSize),
-                page: pageNumber,
-                pageSize: pageSize,
+                page: +pageNumber,
+                pageSize: +pageSize,
                 totalCount: countAll,
                 items: blogsView
             }

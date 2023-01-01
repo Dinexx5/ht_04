@@ -26,21 +26,21 @@ exports.blogsQueryRepository = {
         return __awaiter(this, void 0, void 0, function* () {
             const { sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10, searchNameTerm = null } = query;
             const sortDirectionNumber = sortDirection === "desc" ? -1 : 1;
-            const skippedBlogsNumber = (pageNumber - 1) * pageSize;
+            const skippedBlogsNumber = (+pageNumber - 1) * +pageSize;
             if (searchNameTerm) {
                 const countAllWithSearchTerm = yield db_1.blogsCollection.countDocuments({ name: { $regex: searchNameTerm, $options: 'i' } });
                 const blogsDb = yield db_1.blogsCollection
                     .find({ name: { $regex: searchNameTerm, $options: 'i' } })
                     .sort({ [sortBy]: sortDirectionNumber })
                     .skip(skippedBlogsNumber)
-                    .limit(pageSize)
+                    .limit(+pageSize)
                     .toArray();
                 if (blogsDb.length) {
                     const blogsView = blogsDb.map(blogsMapperToBlogType);
                     return {
                         pagesCount: Math.ceil(countAllWithSearchTerm / pageSize),
-                        page: pageNumber,
-                        pageSize: pageSize,
+                        page: +pageNumber,
+                        pageSize: +pageSize,
                         totalCount: countAllWithSearchTerm,
                         items: blogsView
                     };
@@ -52,14 +52,14 @@ exports.blogsQueryRepository = {
                 .find({})
                 .sort({ [sortBy]: sortDirectionNumber })
                 .skip(skippedBlogsNumber)
-                .limit(pageSize)
+                .limit(+pageSize)
                 .toArray();
             if (blogsDb.length) {
                 const blogsView = blogsDb.map(blogsMapperToBlogType);
                 return {
                     pagesCount: Math.ceil(countAll / pageSize),
-                    page: pageNumber,
-                    pageSize: pageSize,
+                    page: +pageNumber,
+                    pageSize: +pageSize,
                     totalCount: countAll,
                     items: blogsView
                 };
