@@ -12,17 +12,19 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsQueryRepository = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
-function postsMapperToPostType(post) {
-    return {
-        id: post._id.toString(),
-        title: post.title,
-        shortDescription: post.shortDescription,
-        content: post.content,
-        blogId: post.blogId,
-        blogName: post.blogName,
-        createdAt: post.createdAt
-    };
-}
+//
+// function postsMapperToPostType (post: postDbType): postType {
+//     return  {
+//         id: post._id.toString(),
+//         title: post.title,
+//         shortDescription: post.shortDescription,
+//         content: post.content,
+//         blogId: post.blogId,
+//         blogName: post.blogName,
+//         createdAt: post.createdAt
+//     }
+//
+// }
 exports.postsQueryRepository = {
     getAllPosts(query) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -36,7 +38,15 @@ exports.postsQueryRepository = {
                 .skip(skippedBlogsNumber)
                 .limit(pageSize)
                 .toArray();
-            const postsView = postsDb.map(postsMapperToPostType);
+            const postsView = postsDb.map((post) => ({
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt
+            }));
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
                 page: pageNumber,
@@ -58,7 +68,15 @@ exports.postsQueryRepository = {
                 .skip(skippedPostsNumber)
                 .limit(pageSize)
                 .toArray();
-            const postsView = postsDb.map(postsMapperToPostType);
+            const postsView = postsDb.map((post) => ({
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt
+            }));
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
                 page: pageNumber,
@@ -78,7 +96,15 @@ exports.postsQueryRepository = {
             if (!post) {
                 return null;
             }
-            return postsMapperToPostType(post);
+            return {
+                id: post._id.toString(),
+                title: post.title,
+                shortDescription: post.shortDescription,
+                content: post.content,
+                blogId: post.blogId,
+                blogName: post.blogName,
+                createdAt: post.createdAt
+            };
         });
     },
 };
