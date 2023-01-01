@@ -23,14 +23,14 @@ export const postsQueryRepository = {
         const {sortDirection = "desc", sortBy = "createdAt",pageNumber = 1,pageSize = 10} = query
 
         const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
-        const skippedBlogsNumber = (pageNumber-1)*pageSize
+        const skippedBlogsNumber = (+pageNumber-1)*+pageSize
         const countAll = await postsCollection.countDocuments()
 
         let postsDb = await postsCollection
             .find({})
             .sort( {[sortBy]: sortDirectionNumber} )
             .skip(skippedBlogsNumber)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
         const postsView = postsDb.map( (post: postDbType) => ({
 
@@ -44,8 +44,8 @@ export const postsQueryRepository = {
             }))
         return {
             pagesCount: Math.ceil(countAll/pageSize),
-            page: pageNumber,
-            pageSize: pageSize,
+            page: +pageNumber,
+            pageSize: +pageSize,
             totalCount: countAll,
             items: postsView
         }
@@ -62,7 +62,7 @@ export const postsQueryRepository = {
             .find({blogId: {$regex: blogId} })
             .sort( {[sortBy]: sortDirectionNumber, title: sortDirectionNumber, id: sortDirectionNumber} )
             .skip(skippedPostsNumber)
-            .limit(pageSize)
+            .limit(+pageSize)
             .toArray()
 
         const postsView = postsDb.map( (post: postDbType) => ({
@@ -77,8 +77,8 @@ export const postsQueryRepository = {
         }))
         return {
             pagesCount: Math.ceil(countAll/pageSize),
-            page: pageNumber,
-            pageSize: pageSize,
+            page: +pageNumber,
+            pageSize: +pageSize,
             totalCount: countAll,
             items: postsView
         }

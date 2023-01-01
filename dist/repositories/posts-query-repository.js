@@ -30,13 +30,13 @@ exports.postsQueryRepository = {
         return __awaiter(this, void 0, void 0, function* () {
             const { sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10 } = query;
             const sortDirectionNumber = sortDirection === "desc" ? -1 : 1;
-            const skippedBlogsNumber = (pageNumber - 1) * pageSize;
+            const skippedBlogsNumber = (+pageNumber - 1) * +pageSize;
             const countAll = yield db_1.postsCollection.countDocuments();
             let postsDb = yield db_1.postsCollection
                 .find({})
                 .sort({ [sortBy]: sortDirectionNumber })
                 .skip(skippedBlogsNumber)
-                .limit(pageSize)
+                .limit(+pageSize)
                 .toArray();
             const postsView = postsDb.map((post) => ({
                 id: post._id.toString(),
@@ -49,8 +49,8 @@ exports.postsQueryRepository = {
             }));
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
-                page: pageNumber,
-                pageSize: pageSize,
+                page: +pageNumber,
+                pageSize: +pageSize,
                 totalCount: countAll,
                 items: postsView
             };
@@ -66,7 +66,7 @@ exports.postsQueryRepository = {
                 .find({ blogId: { $regex: blogId } })
                 .sort({ [sortBy]: sortDirectionNumber, title: sortDirectionNumber, id: sortDirectionNumber })
                 .skip(skippedPostsNumber)
-                .limit(pageSize)
+                .limit(+pageSize)
                 .toArray();
             const postsView = postsDb.map((post) => ({
                 id: post._id.toString(),
@@ -79,8 +79,8 @@ exports.postsQueryRepository = {
             }));
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
-                page: pageNumber,
-                pageSize: pageSize,
+                page: +pageNumber,
+                pageSize: +pageSize,
                 totalCount: countAll,
                 items: postsView
             };
