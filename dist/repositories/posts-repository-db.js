@@ -14,8 +14,34 @@ const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
 const blogs_query_repository_1 = require("./blogs-query-repository");
 exports.postsRepository = {
-    createPost(title, shortDescription, content, blogId) {
+    createPost(body) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { title, shortDescription, content, blogId } = body;
+            let foundBlog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
+            const newDbPost = {
+                _id: new mongodb_1.ObjectId(),
+                title: title,
+                shortDescription: shortDescription,
+                content: content,
+                blogId: blogId,
+                blogName: foundBlog.name,
+                createdAt: foundBlog.createdAt
+            };
+            yield db_1.postsCollection.insertOne(newDbPost);
+            return {
+                id: newDbPost._id.toString(),
+                title: title,
+                shortDescription: shortDescription,
+                content: content,
+                blogId: blogId,
+                blogName: foundBlog.name,
+                createdAt: foundBlog.createdAt
+            };
+        });
+    },
+    createPostForSpecifiedBlog(body, blogId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { title, shortDescription, content } = body;
             let foundBlog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
             const newDbPost = {
                 _id: new mongodb_1.ObjectId(),
@@ -48,8 +74,9 @@ exports.postsRepository = {
             return result.deletedCount === 1;
         });
     },
-    UpdatePostById(id, title, shortDescription, content, blogId) {
+    UpdatePostById(id, body) {
         return __awaiter(this, void 0, void 0, function* () {
+            const { title, shortDescription, content, blogId } = body;
             if (!mongodb_1.ObjectId.isValid(id)) {
                 return false;
             }

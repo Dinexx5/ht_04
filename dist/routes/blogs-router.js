@@ -18,12 +18,7 @@ const posts_service_1 = require("../domain/posts-service");
 const posts_query_repository_1 = require("../repositories/posts-query-repository");
 exports.blogsRouter = (0, express_1.Router)({});
 exports.blogsRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
-    let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
-    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
-    let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
-    let searchNameTerm = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null;
-    const returnedBlogs = yield blogs_query_repository_1.blogsQueryRepository.getAllBlogs(sortDirectionString, sortBy, pageNumber, pageSize, searchNameTerm);
+    const returnedBlogs = yield blogs_query_repository_1.blogsQueryRepository.getAllBlogs(req.query);
     res.status(200).send(returnedBlogs);
 }));
 exports.blogsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -36,33 +31,27 @@ exports.blogsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 }));
 exports.blogsRouter.get('/:id/posts', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
-    let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
-    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
-    let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
     let blogId = req.params.id;
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(req.params.id);
     if (!blog) {
         res.send(404);
         return;
     }
-    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId);
+    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getPostForBlog(blogId, req.query);
     res.status(200).send(returnedPosts);
 }));
 exports.blogsRouter.post('/:id/posts', input_validation_1.basicAuthorisation, input_validation_1.titleValidation, input_validation_1.shortDescriptionValidation, input_validation_1.contentValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title, shortDescription, content } = req.body;
     const blogId = req.params.id;
     const blog = yield blogs_query_repository_1.blogsQueryRepository.getBlogById(blogId);
     if (!blog) {
         res.send(404);
         return;
     }
-    const newPost = yield posts_service_1.postsService.createPost(title, shortDescription, content, blogId);
+    const newPost = yield posts_service_1.postsService.createPostForSpecifiedBlog(req.body, blogId);
     res.status(201).send(newPost);
 }));
 exports.blogsRouter.post('/', input_validation_1.basicAuthorisation, input_validation_1.nameValidation, input_validation_1.descriptionValidation, input_validation_1.websiteUrlValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { name, description, websiteUrl } = req.body;
-    const newBlog = yield blogs_service_1.blogsService.createBlogs(name, description, websiteUrl);
+    const newBlog = yield blogs_service_1.blogsService.createBlogs(req.body);
     res.status(201).send(newBlog);
 }));
 exports.blogsRouter.delete('/:id', input_validation_1.basicAuthorisation, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -75,9 +64,7 @@ exports.blogsRouter.delete('/:id', input_validation_1.basicAuthorisation, (req, 
     }
 }));
 exports.blogsRouter.put('/:id', input_validation_1.basicAuthorisation, input_validation_1.nameValidation, input_validation_1.descriptionValidation, input_validation_1.websiteUrlValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = req.params.id;
-    const { name, description, websiteUrl } = req.body;
-    let isUpdated = yield blogs_service_1.blogsService.UpdateBlogById(id, name, description, websiteUrl);
+    let isUpdated = yield blogs_service_1.blogsService.UpdateBlogById(req.params.id, req.body);
     if (isUpdated) {
         res.send(204);
     }

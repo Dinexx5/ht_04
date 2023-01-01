@@ -3,7 +3,6 @@ export type getPostsForSpecifiedBlogModel = {
     sortDirection: string
     pageNumber: number
     pageSize: number
-    searchNameTerm: string
 }
 export type getAllBlogsQueryModel = {
     sortBy: string
@@ -26,4 +25,22 @@ export type updateBlogModel = {
     name: string
     description: string
     websiteUrl:string
+}
+export type getAllPostsQueryModel = {
+    sortBy: string
+    sortDirection: string
+    pageNumber: number
+    pageSize: number
+}
+export type createPostInputModel = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
+}
+export type updatePostInputModel = {
+    title: string
+    shortDescription: string
+    content: string
+    blogId: string
 }

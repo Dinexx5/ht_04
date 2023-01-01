@@ -16,11 +16,7 @@ const posts_service_1 = require("../domain/posts-service");
 const posts_query_repository_1 = require("../repositories/posts-query-repository");
 exports.postsRouter = (0, express_1.Router)({});
 exports.postsRouter.get('/', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    let sortBy = req.query.sortBy ? req.query.sortBy.toString() : "createdAt";
-    let sortDirectionString = req.query.sortDirection ? req.query.sortDirection.toString() : "desc";
-    let pageNumber = req.query.pageNumber ? +req.query.pageNumber : 1;
-    let pageSize = req.query.pageSize ? +req.query.pageSize : 10;
-    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize);
+    const returnedPosts = yield posts_query_repository_1.postsQueryRepository.getAllPosts(req.query);
     res.status(200).send(returnedPosts);
 }));
 exports.postsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -33,8 +29,7 @@ exports.postsRouter.get('/:id', (req, res) => __awaiter(void 0, void 0, void 0, 
     }
 }));
 exports.postsRouter.post('/', input_validation_1.basicAuthorisation, input_validation_1.titleValidation, input_validation_1.shortDescriptionValidation, input_validation_1.contentValidation, input_validation_1.blogIdlValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const { title, shortDescription, content, blogId } = req.body;
-    const newPost = yield posts_service_1.postsService.createPost(title, shortDescription, content, blogId);
+    const newPost = yield posts_service_1.postsService.createPost(req.body);
     res.status(201).send(newPost);
 }));
 exports.postsRouter.delete('/:id', input_validation_1.basicAuthorisation, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
@@ -47,9 +42,7 @@ exports.postsRouter.delete('/:id', input_validation_1.basicAuthorisation, (req, 
     }
 }));
 exports.postsRouter.put('/:id', input_validation_1.basicAuthorisation, input_validation_1.titleValidation, input_validation_1.shortDescriptionValidation, input_validation_1.contentValidation, input_validation_1.blogIdlValidation, input_validation_1.inputValidationMiddleware, (req, res) => __awaiter(void 0, void 0, void 0, function* () {
-    const id = req.params.id;
-    const { title, shortDescription, content, blogId } = req.body;
-    let isUpdated = yield posts_service_1.postsService.UpdatePostById(id, title, shortDescription, content, blogId);
+    let isUpdated = yield posts_service_1.postsService.UpdatePostById(req.params.id, req.body);
     if (isUpdated) {
         res.send(204);
     }

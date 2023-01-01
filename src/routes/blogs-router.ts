@@ -1,4 +1,4 @@
-import {Request, Response, Router} from "express";
+import {Response, Router} from "express";
 import {blogsService} from "../domain/blogs-service";
 import {
     basicAuthorisation, contentValidation,
@@ -14,7 +14,7 @@ import {
     postType,
     postsViewModel,
     RequestWithQuery,
-    RequestWithParams, RequestWithBody, RequestWithParamsAndBody
+    RequestWithParams, RequestWithBody, RequestWithParamsAndBody, RequestWithParamsAndQuery
 } from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 import {postsService} from "../domain/posts-service";
@@ -33,17 +33,8 @@ export const blogsRouter = Router({})
 
 blogsRouter.get('/', async (req: RequestWithQuery<getAllBlogsQueryModel>, res: Response<blogsViewModel>) => {
 
-    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
 
-    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
-
-    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
-
-    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
-
-    let searchNameTerm: string | null = req.query.searchNameTerm ? req.query.searchNameTerm.toString() : null
-
-    const returnedBlogs: blogsViewModel = await blogsQueryRepository.getAllBlogs(sortDirectionString, sortBy, pageNumber, pageSize, searchNameTerm)
+    const returnedBlogs: blogsViewModel = await blogsQueryRepository.getAllBlogs(req.query)
 
     res.status(200).send(returnedBlogs)
 })
@@ -57,14 +48,7 @@ blogsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Respons
     }
 })
 
-blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndBody<{id:string}, getPostsForSpecifiedBlogModel>, res: Response) => {
-    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
-
-    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
-
-    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
-
-    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
+blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id:string}, getPostsForSpecifiedBlogModel>, res: Response) => {
 
     let blogId = req.params.id
 
@@ -74,7 +58,7 @@ blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndBody<{id:string}, 
         return
     }
 
-    const returnedPosts: postsViewModel = await postsQueryRepository.getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId)
+    const returnedPosts: postsViewModel = await postsQueryRepository.getPostForBlog(blogId, req.query)
 
     res.status(200).send(returnedPosts)
 
@@ -89,7 +73,6 @@ blogsRouter.post('/:id/posts',
         inputValidationMiddleware,
         async (req: RequestWithParamsAndBody<{id:string}, createPostForSpecifiedBlogInputModel>, res: Response) => {
 
-            const {title, shortDescription, content} = req.body
             const blogId = req.params.id
             const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
             if (!blog) {
@@ -97,7 +80,7 @@ blogsRouter.post('/:id/posts',
                 return
             }
 
-            const newPost: postType = await postsService.createPost(title, shortDescription, content, blogId)
+            const newPost: postType = await postsService.createPostForSpecifiedBlog(req.body, blogId)
             res.status(201).send(newPost)
 
 })
@@ -110,8 +93,8 @@ blogsRouter.post('/',
     inputValidationMiddleware,
     async (req: RequestWithBody<createBlogModel>, res: Response<blogType>) => {
 
-        const {name, description, websiteUrl} = req.body
-        const newBlog: blogType = await blogsService.createBlogs(name, description, websiteUrl)
+
+        const newBlog: blogType = await blogsService.createBlogs(req.body)
         res.status(201).send(newBlog)
     })
 
@@ -133,11 +116,8 @@ blogsRouter.put('/:id',
     websiteUrlValidation,
     inputValidationMiddleware,
     async (req: RequestWithParamsAndBody<{id:string}, updateBlogModel>, res: Response) => {
-        const id = req.params.id
 
-        const {name, description, websiteUrl} = req.body
-
-        let isUpdated: boolean = await blogsService.UpdateBlogById(id, name, description, websiteUrl)
+        let isUpdated: boolean = await blogsService.UpdateBlogById(req.params.id, req.body)
 
         if (isUpdated) {
             res.send(204)

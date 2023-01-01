@@ -2,11 +2,37 @@ import {postsCollection} from "./db";
 import {blogType, postDbType, postType} from "./types";
 import {ObjectId} from "mongodb";
 import {blogsQueryRepository} from "./blogs-query-repository";
+import {createPostForSpecifiedBlogInputModel, createPostInputModel, updatePostInputModel} from "../models/models";
 
 
 export const postsRepository = {
 
-    async createPost (title: string, shortDescription: string, content: string, blogId: string): Promise<postType> {
+    async createPost (body: createPostInputModel): Promise<postType> {
+        const {title, shortDescription, content, blogId} = body
+        let foundBlog = await blogsQueryRepository.getBlogById(blogId)
+        const newDbPost: postDbType  = {
+            _id: new ObjectId(),
+            title: title,
+            shortDescription: shortDescription,
+            content: content,
+            blogId: blogId,
+            blogName: foundBlog!.name,
+            createdAt: foundBlog!.createdAt
+        }
+        await postsCollection.insertOne(newDbPost)
+        return {
+            id: newDbPost._id.toString(),
+            title: title,
+            shortDescription: shortDescription,
+            content: content,
+            blogId: blogId,
+            blogName: foundBlog!.name,
+            createdAt: foundBlog!.createdAt
+        }
+    },
+
+    async createPostForSpecifiedBlog (body: createPostForSpecifiedBlogInputModel, blogId: string): Promise<postType> {
+        const {title, shortDescription, content} = body
         let foundBlog = await blogsQueryRepository.getBlogById(blogId)
         const newDbPost: postDbType  = {
             _id: new ObjectId(),
@@ -42,7 +68,8 @@ export const postsRepository = {
 
 
 
-    async UpdatePostById (id: string, title: string, shortDescription: string, content: string, blogId: string): Promise<boolean> {
+    async UpdatePostById (id: string, body: updatePostInputModel): Promise<boolean> {
+        const {title, shortDescription, content, blogId} = body
         if (!ObjectId.isValid(id)) {
             return false
         }

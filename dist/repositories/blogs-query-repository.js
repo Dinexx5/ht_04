@@ -12,26 +12,30 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.blogsQueryRepository = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
+function blogsMapperToBlogType(blog) {
+    return {
+        name: blog.name,
+        description: blog.description,
+        websiteUrl: blog.websiteUrl,
+        createdAt: blog.createdAt,
+        id: blog._id.toString()
+    };
+}
 exports.blogsQueryRepository = {
-    getAllBlogs(sortDirectionString, sortBy, pageNumber, pageSize, searchNameTerm) {
+    getAllBlogs(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
+            const { sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10, searchNameTerm = null } = query;
+            const sortDirectionNumber = sortDirection === "desc" ? -1 : 1;
             const skippedBlogsNumber = (pageNumber - 1) * pageSize;
             if (searchNameTerm) {
                 const countAllWithSearchTerm = yield db_1.blogsCollection.countDocuments({ name: { $regex: searchNameTerm, $options: 'i' } });
-                let blogsDb = yield db_1.blogsCollection
+                const blogsDb = yield db_1.blogsCollection
                     .find({ name: { $regex: searchNameTerm, $options: 'i' } })
                     .sort({ [sortBy]: sortDirectionNumber })
                     .skip(skippedBlogsNumber)
                     .limit(pageSize)
                     .toArray();
-                const blogsView = blogsDb.map((blog) => ({
-                    name: blog.name,
-                    description: blog.description,
-                    websiteUrl: blog.websiteUrl,
-                    createdAt: blog.createdAt,
-                    id: blog._id.toString()
-                }));
+                const blogsView = blogsDb.map(blogsMapperToBlogType);
                 return {
                     pagesCount: Math.ceil(countAllWithSearchTerm / pageSize),
                     page: pageNumber,
@@ -47,13 +51,7 @@ exports.blogsQueryRepository = {
                 .skip(skippedBlogsNumber)
                 .limit(pageSize)
                 .toArray();
-            const blogsView = blogsDb.map((blog) => ({
-                name: blog.name,
-                description: blog.description,
-                websiteUrl: blog.websiteUrl,
-                createdAt: blog.createdAt,
-                id: blog._id.toString()
-            }));
+            const blogsView = blogsDb.map(blogsMapperToBlogType);
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
                 page: pageNumber,
@@ -73,13 +71,7 @@ exports.blogsQueryRepository = {
             if (!blog) {
                 return null;
             }
-            return {
-                name: blog.name,
-                description: blog.description,
-                websiteUrl: blog.websiteUrl,
-                createdAt: blog.createdAt,
-                id: blog._id.toString()
-            };
+            return blogsMapperToBlogType(blog);
         });
     },
 };

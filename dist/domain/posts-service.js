@@ -12,9 +12,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsService = void 0;
 const posts_repository_db_1 = require("../repositories/posts-repository-db");
 exports.postsService = {
-    createPost(title, shortDescription, content, blogId) {
+    createPost(body) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield posts_repository_db_1.postsRepository.createPost(title, shortDescription, content, blogId);
+            return yield posts_repository_db_1.postsRepository.createPost(body);
+        });
+    },
+    createPostForSpecifiedBlog(body, blogId) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return yield posts_repository_db_1.postsRepository.createPostForSpecifiedBlog(body, blogId);
         });
     },
     deletePostById(id) {
@@ -22,9 +27,9 @@ exports.postsService = {
             return yield posts_repository_db_1.postsRepository.deletePostById(id);
         });
     },
-    UpdatePostById(id, title, shortDescription, content, blogId) {
+    UpdatePostById(id, body) {
         return __awaiter(this, void 0, void 0, function* () {
-            return yield posts_repository_db_1.postsRepository.UpdatePostById(id, title, shortDescription, content, blogId);
+            return yield posts_repository_db_1.postsRepository.UpdatePostById(id, body);
         });
     }
 };

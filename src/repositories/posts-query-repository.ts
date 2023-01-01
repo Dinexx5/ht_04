@@ -1,13 +1,28 @@
 import {blogsCollection, postsCollection} from "./db";
-import {blogDbType, postDbType, postsViewModel, postType} from "./types";
+import {blogDbType, blogType, postDbType, postsViewModel, postType, QueryPosts} from "./types";
 import {ObjectId} from "mongodb";
+import {getAllPostsQueryModel} from "../models/models";
+
+function postsMapperToPostType (post: postDbType): postType {
+    return  {
+        id: post._id.toString(),
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt
+    }
+
+}
 
 
 export const postsQueryRepository = {
 
-    async getAllPosts (sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number,): Promise<postsViewModel> {
+    async getAllPosts (query: getAllPostsQueryModel): Promise<postsViewModel> {
+        const {sortDirection = "desc", sortBy = "createdAt",pageNumber = 1,pageSize = 10} = query
 
-        const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
+        const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
         const skippedBlogsNumber = (pageNumber-1)*pageSize
         const countAll = await postsCollection.countDocuments()
 
@@ -17,15 +32,7 @@ export const postsQueryRepository = {
             .skip(skippedBlogsNumber)
             .limit(pageSize)
             .toArray()
-        const postsView = postsDb.map((post: postDbType) => ({
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }))
+        const postsView = postsDb.map(postsMapperToPostType)
         return {
             pagesCount: Math.ceil(countAll/pageSize),
             page: pageNumber,
@@ -35,9 +42,10 @@ export const postsQueryRepository = {
         }
     },
 
-    async getPostForBlog (sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number, blogId: string): Promise<postsViewModel> {
+    async getPostForBlog (blogId: string, query: QueryPosts): Promise<postsViewModel> {
+        const {sortDirection = "desc", sortBy = "createdAt",pageNumber = 1,pageSize = 10} = query
 
-        const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
+        const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
         const skippedPostsNumber = (pageNumber-1)*pageSize
         const countAll = await postsCollection.countDocuments({blogId: {$regex: blogId} })
 
@@ -48,15 +56,7 @@ export const postsQueryRepository = {
             .limit(pageSize)
             .toArray()
 
-        const postsView = postsDb.map((post: postDbType) => ({
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }))
+        const postsView = postsDb.map(postsMapperToPostType)
         return {
             pagesCount: Math.ceil(countAll/pageSize),
             page: pageNumber,
@@ -77,15 +77,7 @@ export const postsQueryRepository = {
             return null
         }
 
-        return {
-            id: post._id.toString(),
-            title: post.title,
-            shortDescription: post.shortDescription,
-            content: post.content,
-            blogId: post.blogId,
-            blogName: post.blogName,
-            createdAt: post.createdAt
-        }
+        return postsMapperToPostType(post)
     },
 
 }

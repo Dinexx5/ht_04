@@ -1,11 +1,13 @@
 import {blogsCollection} from "./db";
 import {blogDbType, blogType} from "./types";
 import {ObjectId} from "mongodb";
+import {createBlogModel, updateBlogModel} from "../models/models";
 
 
 export const blogsRepository = {
 
-    async createBlogs(name: string, description: string, websiteUrl: string): Promise<blogType> {
+    async createBlogs(body: createBlogModel): Promise<blogType> {
+        const {name, description, websiteUrl} = body
         const newDbBlog: blogDbType = {
             _id: new ObjectId(),
             name: name,
@@ -34,7 +36,8 @@ export const blogsRepository = {
     },
 
 
-    async UpdateBlogById(id: string, name: string, description: string, websiteUrl: string): Promise<boolean> {
+    async UpdateBlogById(id: string, body: updateBlogModel): Promise<boolean> {
+        const {name, description, websiteUrl} = body
         if (ObjectId.isValid(id)) {
             let _id = new ObjectId(id)
             let result = await blogsCollection.updateOne({_id: _id}, {

@@ -12,10 +12,22 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.postsQueryRepository = void 0;
 const db_1 = require("./db");
 const mongodb_1 = require("mongodb");
+function postsMapperToPostType(post) {
+    return {
+        id: post._id.toString(),
+        title: post.title,
+        shortDescription: post.shortDescription,
+        content: post.content,
+        blogId: post.blogId,
+        blogName: post.blogName,
+        createdAt: post.createdAt
+    };
+}
 exports.postsQueryRepository = {
-    getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize) {
+    getAllPosts(query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
+            const { sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10 } = query;
+            const sortDirectionNumber = sortDirection === "desc" ? -1 : 1;
             const skippedBlogsNumber = (pageNumber - 1) * pageSize;
             const countAll = yield db_1.postsCollection.countDocuments();
             let postsDb = yield db_1.postsCollection
@@ -24,15 +36,7 @@ exports.postsQueryRepository = {
                 .skip(skippedBlogsNumber)
                 .limit(pageSize)
                 .toArray();
-            const postsView = postsDb.map((post) => ({
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt
-            }));
+            const postsView = postsDb.map(postsMapperToPostType);
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
                 page: pageNumber,
@@ -42,9 +46,10 @@ exports.postsQueryRepository = {
             };
         });
     },
-    getPostForBlog(sortDirectionString, sortBy, pageNumber, pageSize, blogId) {
+    getPostForBlog(blogId, query) {
         return __awaiter(this, void 0, void 0, function* () {
-            const sortDirectionNumber = sortDirectionString === "desc" ? -1 : 1;
+            const { sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10 } = query;
+            const sortDirectionNumber = sortDirection === "desc" ? -1 : 1;
             const skippedPostsNumber = (pageNumber - 1) * pageSize;
             const countAll = yield db_1.postsCollection.countDocuments({ blogId: { $regex: blogId } });
             let postsDb = yield db_1.postsCollection
@@ -53,15 +58,7 @@ exports.postsQueryRepository = {
                 .skip(skippedPostsNumber)
                 .limit(pageSize)
                 .toArray();
-            const postsView = postsDb.map((post) => ({
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt
-            }));
+            const postsView = postsDb.map(postsMapperToPostType);
             return {
                 pagesCount: Math.ceil(countAll / pageSize),
                 page: pageNumber,
@@ -81,15 +78,7 @@ exports.postsQueryRepository = {
             if (!post) {
                 return null;
             }
-            return {
-                id: post._id.toString(),
-                title: post.title,
-                shortDescription: post.shortDescription,
-                content: post.content,
-                blogId: post.blogId,
-                blogName: post.blogName,
-                createdAt: post.createdAt
-            };
+            return postsMapperToPostType(post);
         });
     },
 };

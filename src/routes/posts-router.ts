@@ -1,8 +1,15 @@
 import {Request, Response, Router} from "express"
 import {basicAuthorisation, blogIdlValidation, contentValidation, inputValidationMiddleware, shortDescriptionValidation, titleValidation} from "../middlewares/input-validation";
 import {postsService} from "../domain/posts-service";
-import {postsViewModel, postType} from "../repositories/types";
+import {
+    postsViewModel,
+    postType, RequestWithBody,
+    RequestWithParams,
+    RequestWithParamsAndBody,
+    RequestWithQuery
+} from "../repositories/types";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
+import {createPostInputModel, getAllPostsQueryModel, updatePostInputModel} from "../models/models";
 
 
 
@@ -11,20 +18,13 @@ export const postsRouter = Router({})
 
 
 
-postsRouter.get('/', async (req: Request, res: Response) => {
+postsRouter.get('/', async (req: RequestWithQuery<getAllPostsQueryModel>, res: Response<postsViewModel>) => {
 
-    let sortBy: string = req.query.sortBy ? req.query.sortBy.toString() : "createdAt"
-
-    let sortDirectionString: string = req.query.sortDirection ? req.query.sortDirection.toString() : "desc"
-
-    let pageNumber: number = req.query.pageNumber ? +req.query.pageNumber : 1
-
-    let pageSize: number = req.query.pageSize ? +req.query.pageSize : 10
-    const returnedPosts: postsViewModel = await postsQueryRepository.getAllPosts(sortDirectionString, sortBy, pageNumber, pageSize)
+    const returnedPosts: postsViewModel = await postsQueryRepository.getAllPosts(req.query)
     res.status(200).send(returnedPosts)
 })
 
-postsRouter.get('/:id', async (req: Request, res: Response) => {
+postsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Response) => {
     let post: postType | null = await postsQueryRepository.getPostById(req.params.id)
     if (!post) {
         res.send(404)
@@ -40,11 +40,9 @@ postsRouter.post('/',
     contentValidation,
     blogIdlValidation,
     inputValidationMiddleware,
-    async (req: Request, res: Response) => {
+    async (req: RequestWithBody<createPostInputModel>, res: Response<postType>) => {
 
-        const {title, shortDescription, content, blogId} = req.body
-
-        const newPost: postType = await postsService.createPost(title, shortDescription, content, blogId)
+        const newPost: postType = await postsService.createPost(req.body)
         res.status(201).send(newPost)
 
 
@@ -52,7 +50,7 @@ postsRouter.post('/',
 
 postsRouter.delete('/:id',
     basicAuthorisation,
-    async (req: Request, res: Response) => {
+    async (req: RequestWithParams<{id:string}>, res: Response) => {
     const isDeleted: boolean = await postsService.deletePostById(req.params.id)
     if (isDeleted) {
         res.send(204)
@@ -68,11 +66,9 @@ postsRouter.put('/:id',
     contentValidation,
     blogIdlValidation,
     inputValidationMiddleware,
-    async (req: Request, res: Response) => {
-        const id = req.params.id
-        const {title, shortDescription, content, blogId} = req.body
+    async (req: RequestWithParamsAndBody<{id:string}, updatePostInputModel>, res: Response) => {
 
-        let isUpdated: boolean = await postsService.UpdatePostById(id, title, shortDescription, content, blogId)
+        let isUpdated: boolean = await postsService.UpdatePostById(req.params.id, req.body)
 
         if (isUpdated) {
             res.send(204)

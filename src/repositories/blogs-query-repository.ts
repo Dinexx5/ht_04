@@ -1,4 +1,4 @@
-import {blogDbType, blogsViewModel, blogType} from "./types";
+import {blogDbType, blogsViewModel, blogType, QueryBlogs} from "./types";
 import {blogsCollection} from "./db";
 import {ObjectId} from "mongodb";
 
@@ -16,8 +16,9 @@ function blogsMapperToBlogType (blog: blogDbType): blogType {
 export const blogsQueryRepository = {
 
 
-    async getAllBlogs(sortDirectionString: string, sortBy: string, pageNumber: number, pageSize: number, searchNameTerm: string | null): Promise<blogsViewModel> {
-        const sortDirectionNumber: 1 | -1 = sortDirectionString === "desc" ? -1 : 1;
+    async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel> {
+        const {sortDirection = "desc", sortBy = "createdAt",pageNumber = 1,pageSize = 10,searchNameTerm = null} = query
+        const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
         const skippedBlogsNumber = (pageNumber-1)*pageSize
 
         if (searchNameTerm){
