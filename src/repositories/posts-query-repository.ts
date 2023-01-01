@@ -1,7 +1,6 @@
-import {blogsCollection, postsCollection} from "./db";
-import {blogDbType, blogType, postDbType, postsViewModel, postType, QueryPosts} from "./types";
+import {postsCollection} from "./db";
 import {ObjectId} from "mongodb";
-import {getAllPostsQueryModel} from "../models/models";
+import {getAllPostsQueryModel, postDbType, postsViewModel, postType, QueryPosts} from "../models/models";
 
 function postsMapperToPostType (post: postDbType): postType {
     return  {

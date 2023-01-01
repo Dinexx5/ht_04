@@ -1,7 +1,7 @@
 
 import {blogsRepository} from "../repositories/blogs-repository-db";
-import {blogType} from "../repositories/types";
-import {createBlogModel, updateBlogModel} from "../models/models";
+
+import {blogType, createBlogModel, updateBlogModel} from "../models/models";
 
 
 export const blogsService = {

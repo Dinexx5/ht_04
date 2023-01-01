@@ -1,6 +1,7 @@
-import {blogDbType, blogsViewModel, blogType, QueryBlogs} from "./types";
+
 import {blogsCollection} from "./db";
 import {ObjectId} from "mongodb";
+import {blogDbType, blogsViewModel, blogType, QueryBlogs} from "../models/models";
 
 function blogsMapperToBlogType (blog: blogDbType): blogType {
     return  {
@@ -16,7 +17,8 @@ function blogsMapperToBlogType (blog: blogDbType): blogType {
 export const blogsQueryRepository = {
 
 
-    async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel | []> {
+    async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel> {
+
         const {sortDirection = "desc", sortBy = "createdAt", pageNumber = 1, pageSize = 10, searchNameTerm = null} = query
         const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
         const skippedBlogsNumber = (+pageNumber-1)*+pageSize
@@ -30,17 +32,15 @@ export const blogsQueryRepository = {
                 .limit(+pageSize)
                 .toArray()
 
-            if (blogsDb.length) {
-                const blogsView = blogsDb.map(blogsMapperToBlogType)
-                return {
-                    pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
-                    page: +pageNumber,
-                    pageSize: +pageSize,
-                    totalCount: countAllWithSearchTerm,
-                    items: blogsView
-                }
+            const blogsView = blogsDb.map(blogsMapperToBlogType)
+            return {
+                pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
+                page: +pageNumber,
+                pageSize: +pageSize,
+                totalCount: countAllWithSearchTerm,
+                items: blogsView
             }
-            return []
+
         }
 
         const countAll = await blogsCollection.countDocuments()
@@ -50,17 +50,16 @@ export const blogsQueryRepository = {
             .skip(skippedBlogsNumber)
             .limit(+pageSize)
             .toArray()
-        if (blogsDb.length) {
-            const blogsView = blogsDb.map(blogsMapperToBlogType)
-            return {
-                pagesCount: Math.ceil(countAll/pageSize),
-                page: +pageNumber,
-                pageSize: +pageSize,
-                totalCount: countAll,
-                items: blogsView
-            }
+
+        const blogsView = blogsDb.map(blogsMapperToBlogType)
+        return {
+            pagesCount: Math.ceil(countAll/pageSize),
+            page: +pageNumber,
+            pageSize: +pageSize,
+            totalCount: countAll,
+            items: blogsView
         }
-        return []
+
 
     },
 

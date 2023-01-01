@@ -4,6 +4,6 @@ export const testingRouter = Router({})
 
 testingRouter.delete('/all-data', async (req: Request, res: Response) => {
     await blogsCollection.deleteMany( {} )
-    await postsCollection.deleteMany( { } )
+    await postsCollection.deleteMany( {} )
     res.send(204)
 })

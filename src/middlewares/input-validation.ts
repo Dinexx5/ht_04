@@ -1,7 +1,7 @@
 import {NextFunction, Request, Response} from "express";
 import {body, validationResult} from "express-validator";
-import {blogType} from "../repositories/types";
 import {blogsQueryRepository} from "../repositories/blogs-query-repository";
+import {blogType} from "../models/models";
 
 export const basicAuthorisation = (req: Request, res: Response, next: NextFunction) => {
     const loginPass = req.headers.authorization;

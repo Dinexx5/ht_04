@@ -9,10 +9,6 @@ import {
     websiteUrlValidation
 } from "../middlewares/input-validation";
 import {
-    blogType,
-    blogsViewModel,
-    postType,
-    postsViewModel,
     RequestWithQuery,
     RequestWithParams, RequestWithBody, RequestWithParamsAndBody, RequestWithParamsAndQuery
 } from "../repositories/types";
@@ -20,10 +16,11 @@ import {blogsQueryRepository} from "../repositories/blogs-query-repository";
 import {postsService} from "../domain/posts-service";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
 import {
+    blogsViewModel, blogType,
     createBlogModel,
     createPostForSpecifiedBlogInputModel,
     getAllBlogsQueryModel,
-    getPostsForSpecifiedBlogModel, updateBlogModel
+    getPostsForSpecifiedBlogModel, paramsIdModel, postsViewModel, postType, updateBlogModel
 } from "../models/models";
 
 
@@ -31,15 +28,15 @@ import {
 export const blogsRouter = Router({})
 
 
-blogsRouter.get('/', async (req: RequestWithQuery<getAllBlogsQueryModel>, res: Response) => {
+blogsRouter.get('/', async (req: RequestWithQuery<getAllBlogsQueryModel>, res: Response<blogsViewModel>) => {
 
 
-    const returnedBlogs: blogsViewModel | [] = await blogsQueryRepository.getAllBlogs(req.query)
+    const returnedBlogs: blogsViewModel= await blogsQueryRepository.getAllBlogs(req.query)
 
     res.status(200).send(returnedBlogs)
 })
 
-blogsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Response) => {
+blogsRouter.get('/:id', async (req: RequestWithParams<paramsIdModel>, res: Response) => {
     const blog: blogType | null = await blogsQueryRepository.getBlogById(req.params.id)
     if (!blog) {
         res.send(404)
@@ -48,7 +45,7 @@ blogsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Respons
     }
 })
 
-blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id:string}, getPostsForSpecifiedBlogModel>, res: Response) => {
+blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<paramsIdModel, getPostsForSpecifiedBlogModel>, res: Response) => {
 
     let blogId = req.params.id
 
@@ -66,22 +63,22 @@ blogsRouter.get('/:id/posts', async (req: RequestWithParamsAndQuery<{id:string},
 
 
 blogsRouter.post('/:id/posts',
-        basicAuthorisation,
-        titleValidation,
-        shortDescriptionValidation,
-        contentValidation,
-        inputValidationMiddleware,
-        async (req: RequestWithParamsAndBody<{id:string}, createPostForSpecifiedBlogInputModel>, res: Response) => {
+    basicAuthorisation,
+    titleValidation,
+    shortDescriptionValidation,
+    contentValidation,
+    inputValidationMiddleware,
+    async (req: RequestWithParamsAndBody<paramsIdModel, createPostForSpecifiedBlogInputModel>, res: Response) => {
 
-            const blogId = req.params.id
-            const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
-            if (!blog) {
-                res.send(404)
-                return
-            }
+        const blogId = req.params.id
+        const blog: blogType | null = await blogsQueryRepository.getBlogById(blogId)
+        if (!blog) {
+            res.send(404)
+            return
+        }
 
-            const newPost: postType = await postsService.createPostForSpecifiedBlog(req.body, blogId)
-            res.status(201).send(newPost)
+        const newPost: postType = await postsService.createPostForSpecifiedBlog(req.body, blogId)
+        res.status(201).send(newPost)
 
 })
 
@@ -100,7 +97,7 @@ blogsRouter.post('/',
 
 blogsRouter.delete('/:id',
     basicAuthorisation,
-    async (req: RequestWithParams<{id:string}>, res: Response) => {
+    async (req: RequestWithParams<paramsIdModel>, res: Response) => {
     const isDeleted: boolean = await blogsService.deleteBlogById(req.params.id)
     if (isDeleted) {
         res.send(204)
@@ -115,7 +112,7 @@ blogsRouter.put('/:id',
     descriptionValidation,
     websiteUrlValidation,
     inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<{id:string}, updateBlogModel>, res: Response) => {
+    async (req: RequestWithParamsAndBody<paramsIdModel, updateBlogModel>, res: Response) => {
 
         let isUpdated: boolean = await blogsService.UpdateBlogById(req.params.id, req.body)
 

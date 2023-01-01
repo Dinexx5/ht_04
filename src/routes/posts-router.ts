@@ -1,15 +1,20 @@
-import {Request, Response, Router} from "express"
+import {Response, Router} from "express"
 import {basicAuthorisation, blogIdlValidation, contentValidation, inputValidationMiddleware, shortDescriptionValidation, titleValidation} from "../middlewares/input-validation";
 import {postsService} from "../domain/posts-service";
 import {
-    postsViewModel,
-    postType, RequestWithBody,
+    RequestWithBody,
     RequestWithParams,
     RequestWithParamsAndBody,
     RequestWithQuery
 } from "../repositories/types";
 import {postsQueryRepository} from "../repositories/posts-query-repository";
-import {createPostInputModel, getAllPostsQueryModel, updatePostInputModel} from "../models/models";
+import {
+    createPostInputModel,
+    getAllPostsQueryModel, paramsIdModel,
+    postsViewModel,
+    postType,
+    updatePostInputModel
+} from "../models/models";
 
 
 
@@ -24,7 +29,7 @@ postsRouter.get('/', async (req: RequestWithQuery<getAllPostsQueryModel>, res: R
     res.status(200).send(returnedPosts)
 })
 
-postsRouter.get('/:id', async (req: RequestWithParams<{id:string}>, res: Response) => {
+postsRouter.get('/:id', async (req: RequestWithParams<paramsIdModel>, res: Response) => {
     let post: postType | null = await postsQueryRepository.getPostById(req.params.id)
     if (!post) {
         res.send(404)
@@ -50,7 +55,7 @@ postsRouter.post('/',
 
 postsRouter.delete('/:id',
     basicAuthorisation,
-    async (req: RequestWithParams<{id:string}>, res: Response) => {
+    async (req: RequestWithParams<paramsIdModel>, res: Response) => {
     const isDeleted: boolean = await postsService.deletePostById(req.params.id)
     if (isDeleted) {
         res.send(204)
@@ -66,7 +71,7 @@ postsRouter.put('/:id',
     contentValidation,
     blogIdlValidation,
     inputValidationMiddleware,
-    async (req: RequestWithParamsAndBody<{id:string}, updatePostInputModel>, res: Response) => {
+    async (req: RequestWithParamsAndBody<paramsIdModel, updatePostInputModel>, res: Response) => {
 
         let isUpdated: boolean = await postsService.UpdatePostById(req.params.id, req.body)
 

@@ -35,17 +35,14 @@ exports.blogsQueryRepository = {
                     .skip(skippedBlogsNumber)
                     .limit(+pageSize)
                     .toArray();
-                if (blogsDb.length) {
-                    const blogsView = blogsDb.map(blogsMapperToBlogType);
-                    return {
-                        pagesCount: Math.ceil(countAllWithSearchTerm / pageSize),
-                        page: +pageNumber,
-                        pageSize: +pageSize,
-                        totalCount: countAllWithSearchTerm,
-                        items: blogsView
-                    };
-                }
-                return [];
+                const blogsView = blogsDb.map(blogsMapperToBlogType);
+                return {
+                    pagesCount: Math.ceil(countAllWithSearchTerm / pageSize),
+                    page: +pageNumber,
+                    pageSize: +pageSize,
+                    totalCount: countAllWithSearchTerm,
+                    items: blogsView
+                };
             }
             const countAll = yield db_1.blogsCollection.countDocuments();
             let blogsDb = yield db_1.blogsCollection
@@ -54,17 +51,14 @@ exports.blogsQueryRepository = {
                 .skip(skippedBlogsNumber)
                 .limit(+pageSize)
                 .toArray();
-            if (blogsDb.length) {
-                const blogsView = blogsDb.map(blogsMapperToBlogType);
-                return {
-                    pagesCount: Math.ceil(countAll / pageSize),
-                    page: +pageNumber,
-                    pageSize: +pageSize,
-                    totalCount: countAll,
-                    items: blogsView
-                };
-            }
-            return [];
+            const blogsView = blogsDb.map(blogsMapperToBlogType);
+            return {
+                pagesCount: Math.ceil(countAll / pageSize),
+                page: +pageNumber,
+                pageSize: +pageSize,
+                totalCount: countAll,
+                items: blogsView
+            };
         });
     },
     getBlogById(id) {

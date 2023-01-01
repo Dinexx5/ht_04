@@ -1,6 +1,10 @@
 import {postsRepository} from "../repositories/posts-repository-db";
-import {postType} from "../repositories/types";
-import {createPostForSpecifiedBlogInputModel, createPostInputModel, updatePostInputModel} from "../models/models";
+import {
+    createPostForSpecifiedBlogInputModel,
+    createPostInputModel,
+    postType,
+    updatePostInputModel
+} from "../models/models";
 
 
 export const postsService = {
