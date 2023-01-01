@@ -16,8 +16,8 @@ function blogsMapperToBlogType (blog: blogDbType): blogType {
 export const blogsQueryRepository = {
 
 
-    async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel> {
-        const {sortDirection = "desc", sortBy = "createdAt",pageNumber = 1,pageSize = 10,searchNameTerm = null} = query
+    async getAllBlogs(query: QueryBlogs): Promise<blogsViewModel | []> {
+        const {sortDirection = "desc", sortBy = "createdAt", pageNumber = 1,pageSize = 10, searchNameTerm = null} = query
         const sortDirectionNumber: 1 | -1 = sortDirection === "desc" ? -1 : 1;
         const skippedBlogsNumber = (pageNumber-1)*pageSize
 
@@ -30,14 +30,17 @@ export const blogsQueryRepository = {
                 .limit(pageSize)
                 .toArray()
 
-            const blogsView = blogsDb.map(blogsMapperToBlogType)
-            return {
-                pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
-                page: pageNumber,
-                pageSize: pageSize,
-                totalCount: countAllWithSearchTerm,
-                items: blogsView
+            if (blogsDb.length) {
+                const blogsView = blogsDb.map(blogsMapperToBlogType)
+                return {
+                    pagesCount: Math.ceil(countAllWithSearchTerm/pageSize),
+                    page: pageNumber,
+                    pageSize: pageSize,
+                    totalCount: countAllWithSearchTerm,
+                    items: blogsView
+                }
             }
+            return []
         }
 
         const countAll = await blogsCollection.countDocuments()
@@ -47,14 +50,17 @@ export const blogsQueryRepository = {
             .skip(skippedBlogsNumber)
             .limit(pageSize)
             .toArray()
-        const blogsView = blogsDb.map(blogsMapperToBlogType)
-        return {
-            pagesCount: Math.ceil(countAll/pageSize),
-            page: pageNumber,
-            pageSize: pageSize,
-            totalCount: countAll,
-            items: blogsView
+        if (blogsDb.length) {
+            const blogsView = blogsDb.map(blogsMapperToBlogType)
+            return {
+                pagesCount: Math.ceil(countAll/pageSize),
+                page: pageNumber,
+                pageSize: pageSize,
+                totalCount: countAll,
+                items: blogsView
+            }
         }
+        return []
 
     },
 

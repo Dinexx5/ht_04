@@ -57,11 +57,11 @@ export type postDbType = {
 }
 
 export type blogsViewModel = {
-    pagesCount: number
-    page: number
-    pageSize: number
-    totalCount: number
-    items: blogType[]
+    pagesCount?: number
+    page?: number
+    pageSize?: number
+    totalCount?: number
+    items?: blogType[] | null
 }
 
 export type postsViewModel = {
